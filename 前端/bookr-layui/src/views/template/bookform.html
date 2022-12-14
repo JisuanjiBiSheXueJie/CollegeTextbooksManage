@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>编辑教材信息</title>
+  <meta name="renderer" content="webkit">
+  <meta name="referrer" content="no-referrer" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <link rel="stylesheet" href="../../layuiadmin/layui/css/layui.css" media="all">
+</head>
+
+<body>
+
+  <div class="layui-form" lay-filter="layuiadmin-form-booklist" id="layuiadmin-form-booklist"
+    style="padding: 20px 0 0 0;">
+    <div class="layui-form-item">
+      <label class="layui-form-label">出版时间</label>
+      <div class="layui-input-inline">
+        <input type="text" id="publishTime" name="publishTime" lay-verify="required" placeholder="请输入出版时间"
+          autocomplete="off" class="layui-input">
+      </div>
+    </div>
+    <div class="layui-form-item">
+      <label class="layui-form-label">出版社</label>
+      <div class="layui-input-inline">
+        <input type="text" id="publisher" name="publisher" lay-verify="required" placeholder="请输入出版社" autocomplete="off"
+          class="layui-input">
+      </div>
+    </div>
+    <div class="layui-form-item">
+      <label class="layui-form-label">教材名</label>
+      <div class="layui-input-inline">
+        <input type="text" id="name" name="name" lay-verify="required" placeholder="请输入教材名" autocomplete="off"
+          class="layui-input">
+      </div>
+    </div>
+    <div class="layui-form-item">
+      <label class="layui-form-label">作者</label>
+      <div class="layui-input-inline">
+        <input type="text" id="author" name="author" lay-verify="required" placeholder="请输入作者名" autocomplete="off"
+          class="layui-input">
+      </div>
+    </div>
+    <div class="layui-form-item">
+      <label class="layui-form-label">定价(元)</label>
+      <div class="layui-input-inline">
+        <input type="text" id="price" name="price" lay-verify="requried" placeholder="请输入教材定价" autocomplete="off"
+          class="layui-input">
+      </div>
+    </div>
+    <div class="layui-form-item" id="chooseImg">
+      <label class="layui-form-label">教材封面</label>
+      <div class="layui-inline">
+        <input type="text" id="imageUrl" name="imageUrl" lay-verify="requried" placeholder="请输入图片链接" autocomplete="off"
+          class="layui-input">
+      </div>
+      <div class="layui-inline">
+        <button type="button" class="layui-btn" id="addimage">
+          <i class="layui-icon">&#xe67c;</i>上传图片
+        </button>
+      </div>
+    </div>
+    <div class="layui-form-item" id="seeImg" style="display: none;">
+      <label class="layui-form-label">图片预览</label>
+      <div class="layui-input-inline" id="div_prev">
+
+      </div>
+    </div>
+    <div class="layui-form-item layui-hide">
+      <input type="button" lay-submit lay-filter="LAY-book-front-submit" id="LAY-book-front-submit" value="确认">
+    </div>
+  </div>
+
+  <script src="../../layuiadmin/layui/layui.js"></script>
+  <script>
+    layui.config({
+      base: '../../layuiadmin/' //静态资源所在路径
+    }).extend({
+      index: 'lib/index' //主入口模块
+    }).use(['index', 'form', 'laydate', 'upload'], function () {
+      var $ = layui.$,
+        form = layui.form,
+        upload = layui.upload,
+        laydate = layui.laydate,
+        setter = layui.setter;
+
+      laydate.render({
+        elem: '#publishTime',
+      });
+
+      upload.render({
+        elem: '#addimage',
+        url: setter.baseURL + 'uploadImage',
+        method: 'post',
+        headers: {
+          'Authorization': sessionStorage.getItem("token"),
+          'Access-Control-Allow-Origin': '*'
+        },
+        auto: false,
+        bindAction: '#LAY-book-front-submit',
+        choose: function (obj) {
+          var files = obj.pushFile();
+
+          obj.preview(function (index, file, result) {
+            var imgobj = new Image();
+            imgobj.src = result;
+            imgobj.width = 100;
+            imgobj.height = 100;
+            imgobj.className = 'thumb';
+            $("#div_prev").empty();
+            document.getElementById("div_prev").appendChild(imgobj);
+            $("#seeImg").attr("style", "display: block");
+            $("#imageUrl").val(file.name);
+            form.render();
+          });
+        }
+      });
+
+      $("#imageUrl").bind("input propertychange", function (event) {
+        var img = $("#imageUrl").val();
+        if (img == '' || img == null || img == undefined) {
+          $("#seeImg").attr("style", "display: none");
+        } else {
+          img = 'https://images.weserv.nl/?url=' + img;
+          var image = new Image();
+          image.src = img;
+          image.width = 100;
+          image.height = 100;
+          image.referrerPolicy = 'no-referrer|origin|unsafe-url';
+
+          $("#div_prev").empty();
+          document.getElementById("div_prev").appendChild(image);
+          $("#seeImg").attr("style", "display: block");
+        }
+      });
+
+      layer.ready(function() {
+        var img = $("#imageUrl").val();
+        if (img == '' || img == null || img == undefined) {
+          $("#seeImg").attr("style", "display: none");
+        } else {
+          img = setter.baseURL + 'images/' + img;
+          var image = new Image();
+          image.src = img;
+          image.width = 100;
+          image.height = 100;
+          image.referrerPolicy = 'no-referrer|origin|unsafe-url';
+
+          $("#div_prev").empty();
+          document.getElementById("div_prev").appendChild(image);
+          $("#seeImg").attr("style", "display: block");
+        }
+      })
+    })
+  </script>
+</body>
+
+</html>
